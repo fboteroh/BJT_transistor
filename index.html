@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transistores BJT</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#5d6670;--bd:#d7dce2;--ac:#2a6fdb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181c;--card:#1e2328;--tx:#e8ebef;--mu:#98a2ad;--bd:#343b43;--ac:#6da2ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15181c;--card:#1e2328;--tx:#e8ebef;--mu:#98a2ad;--bd:#343b43;--ac:#6da2ff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:14px}
+h1{font-size:1.25rem;margin:0 0 4px}
+.sub{color:var(--mu);font-size:.88rem;margin:0 0 12px}
+.grid{display:grid;gap:12px}
+@media(min-width:800px){.grid{grid-template-columns:1.1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}
+.seg button{padding:8px 2px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;font:inherit;font-size:.85rem;cursor:pointer}
+.seg button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+label{display:block;margin-top:10px;font-size:.88rem}
+label output{float:right;font-weight:600}
+input[type=range]{width:100%}
+select{font:inherit;padding:4px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx)}
+.two{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:.88rem;align-items:center}
+svg{width:100%;height:auto;display:block}
+svg .t{font:11px system-ui,sans-serif;fill:var(--tx)}
+svg .m{fill:var(--mu)}
+svg .w{stroke:var(--tx);stroke-width:2;fill:none}
+.flow{fill:none;stroke:#ffb020;stroke-width:4;stroke-linecap:round;stroke-dasharray:.1 12;animation:mv 1s linear infinite}
+@keyframes mv{to{stroke-dashoffset:-12.1}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.mt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mt div{background:var(--bg);border-radius:8px;padding:6px 8px;font-size:.8rem;color:var(--mu)}
+.mt b{display:block;font-size:1rem;color:var(--tx)}
+.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;color:#fff}
+.corte{background:#7b8591}.activa{background:#d98a00}.saturación{background:#2e9e4f}
+.warn{margin-top:8px;padding:6px 10px;border-radius:8px;background:#d6282822;border:1px solid #d62828;font-size:.85rem}
+.exp p{margin:6px 0;font-size:.88rem}
+code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:.82rem}
+ul{margin:6px 0 0;padding-left:18px;font-size:.86rem}
+h2{font-size:1rem;margin:0 0 4px}
+.note{font-size:.75rem;color:var(--mu);margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>Transistores BJT</h1>
+<p class="sub">El transistor como interruptor: ajusta la fuente de control (Vin) y observa corrientes, estado y LED.</p>
+<div class="grid">
+<div>
+<div class="card"><svg id="sv" viewBox="0 0 420 360" role="img" aria-label="Circuito con transistor, LED y resistencias"></svg></div>
+<div class="card" id="out"></div>
+</div>
+<div>
+<div class="card">
+<div class="seg" id="tseg"></div>
+<div class="sub" id="tinfo"></div>
+<label>Fuente Vcc <output id="o_vcc"></output><input type="range" id="vcc" min="3" max="24" step="0.5" value="9"></label>
+<label>Fuente de control Vin <output id="o_vin"></output><input type="range" id="vin" min="0" max="9" step="0.05" value="5"></label>
+<label>Resistencia de base RB <output id="o_rb"></output><input type="range" id="rb" min="0" max="1000" value="557"></label>
+<label>Resistencia de colector RC <output id="o_rc"></output><input type="range" id="rc" min="0" max="1000" value="506"></label>
+<div class="two">
+<span>LED <select id="led"></select></span>
+<span>en serie <select id="nl"><option>1</option><option>2</option><option>3</option></select></span>
+</div>
+</div>
+<div class="card exp" id="exp"></div>
+<div class="card"><h2>Retos</h2>
+<ul>
+<li>Con el 2N2222, sube Vin desde 0 V: ¿a partir de qué valor empieza a encender el LED?</li>
+<li>Reduce RB hasta que el estado pase de “activa” a “saturación”. ¿Qué cambia en Ic?</li>
+<li>Cambia al PN2907 (PNP): ¿por qué ahora el LED enciende al bajar Vin?</li>
+<li>Con RC = 10 Ω y Vcc alto, ¿qué advertencias aparecen y por qué?</li>
+</ul>
+<div class="note">Modelo simplificado: β, Vbe y Vce,sat constantes (valores típicos aproximados) y LED con caída fija Vf.</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+const T={'2N2222':{t:'NPN',b:150,vbe:.7,vcs:.3,icm:.8,vceo:40,pm:.5},'PN2907':{t:'PNP',b:100,vbe:.75,vcs:.4,icm:.6,vceo:60,pm:.625},'TIP31C':{t:'NPN',b:50,vbe:.8,vcs:.5,icm:3,vceo:100,pm:2},'TIP32C':{t:'PNP',b:50,vbe:.8,vcs:.5,icm:3,vceo:100,pm:2}};
+const LED={Rojo:{v:1.9,c:'#ff3b30'},Amarillo:{v:2.0,c:'#ffd60a'},Verde:{v:2.1,c:'#30d158'},Azul:{v:3.0,c:'#3b82f6'},Blanco:{v:3.1,c:'#f2f2f2'}};
+const s={q:'2N2222',vcc:9,vin:5,rb:4700,rc:330,led:'Rojo',n:1};
+const $=id=>document.getElementById(id);
+const num=x=>String(parseFloat(x.toPrecision(3))).replace('.',',');
+const fmtI=a=>a===0?'0 mA':a<1e-3?num(a*1e6)+' µA':a<1?num(a*1e3)+' mA':num(a)+' A';
+const fmtR=r=>r>=1e3?num(r/1e3)+' kΩ':num(r)+' Ω';
+const r2=v=>+v.toPrecision(2);
+$('tseg').innerHTML=Object.keys(T).map(k=>`<button data-q="${k}">${k}</button>`).join('');
+$('led').innerHTML=Object.keys(LED).map(k=>`<option>${k}</option>`).join('');
+
+function calc(){
+ const q=T[s.q],npn=q.t==='NPN',vf=LED[s.led].v*s.n;
+ const ib0=npn?(s.vin-q.vbe)/s.rb:(s.vcc-s.vin-q.vbe)/s.rb;
+ const ib=Math.max(0,ib0),icsat=Math.max(0,(s.vcc-vf-q.vcs)/s.rc),act=q.b*ib;
+ let ic=0,vce=s.vcc,mode='corte';
+ if(ib>0){
+  if(icsat===0){mode='activa'}
+  else if(act>=icsat){mode='saturación';ic=icsat;vce=q.vcs}
+  else{mode='activa';ic=act;vce=s.vcc-vf-ic*s.rc}
+ }
+ return{q,npn,vf,ib0,ib,icsat,act,ic,vce,mode,p:vce*ic+q.vbe*ib};
+}
+
+function draw(r){
+ const q=r.q,npn=r.npn,lc=LED[s.led].c,b=Math.min(1,r.ic/0.02);
+ const dur=c=>Math.max(.25,2.5-Math.log10(1+c*1000)*.9).toFixed(2);
+ let g='<path class="w" d="M265 20V143M265 217V340M20 340H380M380 20H265M380 20V164M380 196V340M30 180H235M30 180V201M30 229V340M200 340V348M190 348H210M194 353H206M198 358H202"/>';
+ g+=`<path class="flow" d="M265 20V143" style="animation-duration:${dur(r.ic)}s;opacity:${r.ic>0?1:0}"/><path class="flow" d="M265 217V340" style="animation-duration:${dur(r.ic)}s;opacity:${r.ic>0?1:0}"/>`;
+ g+=`<path class="flow" d="${npn?'M30 180H235':'M235 180H30'}" style="animation-duration:${dur(r.ib*10)}s;opacity:${r.ib>0?1:0}"/>`;
+ g+='<circle cx="250" cy="180" r="48" fill="var(--card)" fill-opacity=".6" stroke="var(--mu)" stroke-width="1.5"/><path class="w" d="M235 155V205M235 168L265 143M235 192L265 217"/>';
+ const arrow=(px,py,dx,dy)=>{const L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy,ny=ux,bx=px-9*ux,by=py-9*uy;return `<polygon fill="var(--tx)" points="${px},${py} ${bx+4*nx},${by+4*ny} ${bx-4*nx},${by-4*ny}"/>`};
+ g+=npn?arrow(259,212,30,25):arrow(241,163,-30,25);
+ g+=`<text class="t m" x="214" y="176">B</text><text class="t m" x="273" y="158">${npn?'C':'E'}</text><text class="t m" x="273" y="212">${npn?'E':'C'}</text>`;
+ const res=(cy,l)=>`<rect x="257" y="${cy-16}" width="16" height="32" fill="var(--card)" stroke="var(--tx)" stroke-width="2"/><text class="t" x="285" y="${cy+4}">${l}</text>`;
+ const led=cy=>`<circle cx="265" cy="${cy}" r="30" fill="${lc}" opacity="${(b*.35).toFixed(2)}"/><circle cx="265" cy="${cy}" r="18" fill="${lc}" opacity="${(b*.6).toFixed(2)}"/><polygon points="255,${cy-9} 275,${cy-9} 265,${cy+9}" fill="var(--card)"/><polygon points="255,${cy-9} 275,${cy-9} 265,${cy+9}" fill="${lc}" fill-opacity="${(.2+.8*b).toFixed(2)}" stroke="var(--tx)" stroke-width="2"/><line x1="254" y1="${cy+9}" x2="276" y2="${cy+9}" stroke="var(--tx)" stroke-width="2"/><text class="t" x="285" y="${cy+4}">LED ${s.led.toLowerCase()} ×${s.n}</text>`;
+ const rcL='RC '+fmtR(s.rc);
+ g+=npn?res(55,rcL)+led(105):led(255)+res(305,rcL);
+ g+=`<rect x="95" y="172" width="50" height="16" fill="var(--card)" stroke="var(--tx)" stroke-width="2"/><text class="t" x="120" y="163" text-anchor="middle">RB ${fmtR(s.rb)}</text>`;
+ g+=`<circle cx="380" cy="180" r="16" fill="var(--card)" stroke="var(--tx)" stroke-width="2"/><text class="t" x="380" y="185" text-anchor="middle">+</text><text class="t" x="380" y="212" text-anchor="middle">Vcc</text><text class="t" x="380" y="226" text-anchor="middle">${num(s.vcc)} V</text>`;
+ g+=`<circle cx="30" cy="215" r="14" fill="var(--card)" stroke="var(--tx)" stroke-width="2"/><text class="t" x="30" y="220" text-anchor="middle">+</text><text class="t" x="30" y="246" text-anchor="middle">Vin</text><text class="t" x="30" y="260" text-anchor="middle">${num(s.vin)} V</text>`;
+ $('sv').innerHTML=g;
+}
+
+function panel(r){
+ const q=r.q,ve=r.npn?'Vbe':'Veb',vc=r.npn?'Vce':'Vec';
+ const M=[['Ib',fmtI(r.ib)],['Ic',fmtI(r.ic)],[ve,num(q.vbe)+' V'],[vc,num(r.vce)+' V'],['β efectivo',r.ib>0?num(r.ic/r.ib):'—'],['P transistor',num(r.p*1000)+' mW']];
+ let h=`<div>Estado: <span class="bd ${r.mode}">${r.mode}</span></div><div class="mt">${M.map(m=>`<div>${m[0]}<b>${m[1]}</b></div>`).join('')}</div>`;
+ const W=[];
+ if(r.ic>q.icm)W.push(`Ic supera el máximo del ${s.q} (${fmtI(q.icm)}).`);
+ if(r.ic>.03)W.push('Corriente excesiva para un LED común (más de 30 mA): aumenta RC.');
+ if(r.p>q.pm)W.push(`Potencia en el transistor (${num(r.p*1000)} mW) mayor que ${num(q.pm*1000)} mW${q.pm===2?' (sin disipador)':''}.`);
+ if(r.ib>0&&r.icsat===0)W.push('Vcc es insuficiente para encender los LED: sube Vcc o quita LED en serie.');
+ h+=W.map(w=>`<div class="warn">⚠ ${w}</div>`).join('');
+ $('out').innerHTML=h;
+}
+
+function explain(r){
+ const q=r.q;
+ const f1=r.npn?`Ib = (Vin − Vbe) / RB = (${num(s.vin)} − ${num(q.vbe)}) / ${fmtR(s.rb)}`:`Ib = (Vcc − Vin − Veb) / RB = (${num(s.vcc)} − ${num(s.vin)} − ${num(q.vbe)}) / ${fmtR(s.rb)}`;
+ let h=`<h2>¿Qué está pasando?</h2><p>${r.npn?'NPN: conduce cuando la base se lleva a un voltaje mayor que el emisor (a tierra). La corriente de base entra por B.':'PNP: el emisor va a Vcc y conduce cuando la base se lleva a un voltaje menor que Vcc. La corriente de base sale por B hacia la fuente Vin.'}</p>`;
+ h+=`<p><code>${f1} ${r.ib0<=0?'≤ 0 → Ib = 0':'= '+fmtI(r.ib)}</code></p>`;
+ if(r.mode==='corte')h+=`<p><b>Corte:</b> ${r.npn?`Vin está por debajo de Vbe (≈ ${num(q.vbe)} V), la unión base-emisor no conduce.`:`Vin debe bajar a ${num(Math.max(0,s.vcc-q.vbe))} V o menos para que la unión emisor-base conduzca.`} Ic = 0: interruptor abierto y LED apagado.</p>`;
+ if(r.mode==='activa')h+=`<p><b>Zona activa:</b> <code>Ic = β·Ib = ${q.b} × ${fmtI(r.ib)} = ${fmtI(r.ic)}</code>. El transistor amplifica la corriente de base: al mover Vin cambia el brillo. El circuito permitiría como máximo Ic,sat = ${fmtI(r.icsat)}.</p>`;
+ if(r.mode==='saturación')h+=`<p><b>Saturación:</b> β·Ib = ${fmtI(r.act)} supera lo que el circuito deja pasar. <code>Ic,sat = (Vcc − Vf − Vce,sat) / RC = (${num(s.vcc)} − ${num(r.vf)} − ${num(q.vcs)}) / ${fmtR(s.rc)} = ${fmtI(r.icsat)}</code>. Es el modo “interruptor cerrado”: Vce ≈ ${num(q.vcs)} V y la corriente la fija RC, no el transistor.</p>`;
+ h+=`<p>Para usarlo como interruptor conviene saturar con margen: Ib ≳ Ic / (β/10). Para este caso, Ib ≳ ${fmtI(r.icsat*10/q.b)}.</p>`;
+ $('exp').innerHTML=h;
+}
+
+function upd(){
+ s.vcc=+$('vcc').value;$('vin').max=s.vcc;s.vin=Math.min(+$('vin').value,s.vcc);$('vin').value=s.vin;
+ s.rb=r2(100*Math.pow(10,$('rb').value/1000*3));s.rc=r2(10*Math.pow(10,$('rc').value/1000*3));
+ s.led=$('led').value;s.n=+$('nl').value;
+ $('o_vcc').textContent=num(s.vcc)+' V';$('o_vin').textContent=num(s.vin)+' V';$('o_rb').textContent=fmtR(s.rb);$('o_rc').textContent=fmtR(s.rc);
+ const q=T[s.q];
+ document.querySelectorAll('#tseg button').forEach(b=>b.classList.toggle('on',b.dataset.q===s.q));
+ $('tinfo').textContent=`${s.q} · ${q.t} · β ≈ ${q.b} · Icmáx ${fmtI(q.icm)} · Vceo ${q.vceo} V`;
+ const r=calc();draw(r);panel(r);explain(r);
+}
+document.addEventListener('input',upd);
+$('tseg').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ s.q=b.dataset.q;$('vin').value=T[s.q].t==='NPN'?Math.min(5,+$('vcc').value):0;upd();
+});
+upd();
+</script>
+</body>
+</html>
